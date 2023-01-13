@@ -1,0 +1,373 @@
+openapi: 3.0.3
+info:
+  title: Swagger E-WALLET API - OpenAPI 3.0
+  description: e-wallet with transfer and topup function
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: user1@mail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: auth
+    description: Authentication
+  - name: register
+    description: Register new user
+  - name: topup
+    description: Topup to user
+  - name: transfer
+    description: Transfer from user
+  - name: transaction
+    description: Transaction detail
+  - name: users
+    description: Get User Details
+security:
+  - BearerAuth: []
+paths:
+  /sign-in:
+    post:
+      tags:
+        - auth
+      summary: Sign in to get JWT token
+      description: Sign in to get JWT token
+      operationId: signIn
+      requestBody:
+        description: User credentials
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IDToken'
+
+        '401':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '500':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /register:
+    post:
+      tags:
+        - register
+      summary: Register new user
+      description: Register new user
+      operationId: registerUser
+      requestBody:
+        description: Create new user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          description: Field Required Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FieldRequiredError'
+        '500':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /wallets/top-up:
+    post:
+      tags:
+        - topup
+      summary: TopUp to user account
+      description: TopUp to user account
+      operationId: userTopUp
+      requestBody:
+        description: Top Up Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopUpRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopUpResponse'
+        '400':
+          description: Source Not Found Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceNotFoundError'
+        '401':
+          description: Unauthorize User Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /wallets/transfer:
+    post:
+      tags:
+        - transfer
+      summary: transfer from user to another user
+      description: transfer from user to another user
+      operationId: userTransfer
+      requestBody:
+        description: Transfer Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferResponse'
+        '400':
+          description: Bad Request Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+        '401':
+          description: Untauthorize User Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+  /wallets/transactions:
+    get:
+      tags:
+        - transaction
+      summary: user transaction details
+      description: User transaction details
+      operationId: transactionDetails
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
+        '400':
+          description: Bad Request Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+        '401':
+          description: Untauthorize User Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /wallets:
+    get:
+      tags:
+        - users
+      summary: user details
+      description: User details
+      operationId: userDetails
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+        '400':
+          description: Bad Request Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+        '401':
+          description: Untauthorize User Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+components:
+  schemas:
+    Credentials:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: user1@mail.com
+        password:
+          type: string
+          example: user1
+    IDToken:
+      type: object
+      properties:
+        idToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTRUEiLCJleHAiOjE2NjAyMDgyODcsImlhdCI6MTY2MDIwNzM4NywidXNlciI6eyJpZCI6MTcsImVtYWlsIjoicG9zdDZAc2hvcGVlLmNvbSIsIndhbGxldF9pZCI6MTAwMDE3fX0.SCCoDp13JTUwrHxLF0AnJQDtqe89HvMBD-K8IJqpB70
+    WalletResponse:
+      type: object
+      example:
+        user_id: 7
+        wallet_id: 100007
+        email: user7@mail.com
+        balance: 5300000
+    RegisterResponse:
+      type: object
+      example:
+        id: 11
+        name: user11
+        email: user11
+        password": user11
+    RegisterRequest:
+      type: object
+      example:
+        email: user11@mail.com
+        name: user11
+        password: user11
+    TopUpRequest:
+      type: object
+      example:
+        amount: 50000
+        wallet_id: 100001
+        target_wallet_id: 1001
+    TopUpResponse:
+      type: object
+      example:
+        id: 36
+        amount: 50000
+        transaction_type: CREDIT
+        wallet_id: 100001
+        target_wallet_id: 1001
+        description: Top Up from Bank Transfer
+    TransferRequest:
+      type: object
+      example:
+        amount: 50000
+        wallet_id: 100001
+        target_wallet_id: 1001
+        description: test
+    TransferResponse:
+      type: object
+      example:
+        id": 41
+        amount": 50000
+        transaction_type": DEBIT
+        wallet_id": 100001
+        target_wallet_id": 100003
+        description": test
+    TransactionResponse:
+      type: object
+      example:
+        created_at: 2022-07-02T06:54:20Z
+        wallet_id: 100007
+        target_id: 1003
+        transaction_type: CREDIT
+        description: Top Up from Credit Card
+        amount: 3200000
+    UnauthorizedError:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 401
+        code:
+          type: string
+          example: "UNAUTHORIZED_ERROR"
+        message:
+          type: string
+          example: Unauthorized error
+    FieldRequiredError:
+      type: object
+      example:
+        statusCode: 400
+        code: BAD_REQUEST
+        message: 'Key: ''UserReq.Email'' Error:Field validation for ''Email'' failed on the ''required'' tag'
+    SourceNotFoundError:
+      type: object
+      example:
+        statusCode: 400
+        code: INVALID_SOURCE
+        message: Invalid Source of Funds
+    BadRequestError:
+      type: object
+      example:
+        statusCode: 400
+        code: BAD_REQUEST
+        message: 'Bad request'
+    InternalServerError:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 500
+        code:
+          type: string
+          example: "INTERNAL_SERVER_ERROR"
+        message:
+          type: string
+          example: Internal server error
+  requestBodies:
+    CredentialsBody:
+      description: User email and password
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Credentials'
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
